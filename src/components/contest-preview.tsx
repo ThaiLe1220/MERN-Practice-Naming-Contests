@@ -1,18 +1,25 @@
+/* eslint-disable no-unused-vars */
 import React from "react";
-// contest-list.tsx and contest-preview.tsx
-import { ContestType } from "../models/ContestType"; // Update the path to the actual location
+import { ContestType } from "../models/ContestType";
 
-// ContestPreview.tsx
-// The props for ContestPreview should only include the contest object
 type ContestPreviewProps = {
   contest: ContestType;
+  onClick: (contestId: string) => void;
+  onDelete: (contestId: string) => void;
 };
 
-const ContestPreview: React.FC<ContestPreviewProps> = ({ contest }) => {
+const ContestPreview: React.FC<ContestPreviewProps> = ({
+  contest,
+  onClick,
+  onDelete, // Add this line
+}) => {
   return (
     <div className="contest-preview">
       <div className="category">{contest.categoryName}</div>
       <div className="contest">{contest.contestName}</div>
+      <button onClick={() => onClick(contest.id)}>View Contest</button>
+      <button onClick={() => onDelete(contest.id)}>Delete</button>{" "}
+      {/* Add this button */}
     </div>
   );
 };

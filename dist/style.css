@@ -83,7 +83,48 @@ form button {
   border-radius: 0.25rem;
 }
 
+.add-new-contest {
+  margin-top: 2rem;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  max-width: 500px;
+  margin: 2rem auto;
+}
+
 .add-new-contest form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.add-new-contest input,
+.add-new-contest textarea {
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+.add-new-contest button {
+  width: auto;
+  margin-top: 1rem;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-new-contest button:hover {
+  background-color: #45a049;
+}
+
+/* .add-new-contest form {
   margin-top: 2rem;
   display: flex;
   flex-direction: column;
@@ -101,3 +142,4 @@ form button {
   margin: 2rem auto;
   text-align: center;
 }
+ */

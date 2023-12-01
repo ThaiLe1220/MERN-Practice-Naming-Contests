@@ -1,5 +1,8 @@
+// File: ContestType.ts
+
 export type ContestType = {
-  id: string; // This should match the type of the unique identifier in your contest objects
+  id: string;
   categoryName: string;
   contestName: string;
+  description: string;
 };

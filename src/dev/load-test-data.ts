@@ -77,7 +77,7 @@ A list of free online programming books, categorized by languages/topics
     },
   ]);
 
-  console.info("Inserted Contests:", resp.insertedCount);
+  // console.info("Inserted Contests:", resp.insertedCount);
 
   stopClient();
 }
