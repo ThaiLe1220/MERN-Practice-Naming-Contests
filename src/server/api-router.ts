@@ -3,10 +3,14 @@
 
 import express from "express";
 import cors from "cors";
-import { connectClient, saveCorrectedDocumentToMongoDB } from "./db";
+import {
+  connectClient,
+  saveUploadedDocument,
+  retrieveFileFromMongoDB,
+  retrieveAllFilesFromMongoDB,
+} from "./db";
 import axios from "axios";
 import multer from "multer";
-import mammoth from "mammoth";
 
 const router = express.Router();
 router.use(cors());
@@ -15,7 +19,6 @@ router.use(express.json());
 const storage = multer.memoryStorage(); // Store files in memory
 const upload = multer({ storage: storage });
 
-// Route to get a list of all contests.
 router.get("/contests", async (req, res) => {
   const client = await connectClient();
   const contests = await client
@@ -33,7 +36,6 @@ router.get("/contests", async (req, res) => {
   res.send({ contests });
 });
 
-// Route to get a single contest by its ID.
 router.get("/contests/:contestId", async (req, res) => {
   const client = await connectClient();
   const contest = await client
@@ -139,60 +141,50 @@ router.post(
   "/upload-contest-document",
   upload.single("file"),
   async (req, res) => {
+    if (!req.file) return res.status(400).send("No file uploaded.");
+
     try {
-      if (!req.file) throw new Error("No file uploaded");
-
-      // Extract text from Word document
-      const textResult = await mammoth.extractRawText({
-        buffer: req.file.buffer,
-      });
-      const documentText = textResult.value; // The extracted text
-
-      // Split text into sentences
-      const sentences = documentText.match(/[^\.!\?]+[\.!\?]+/g);
-
-      // Array to hold promises
-      let grammarCheckPromises = [];
-
-      // Check grammar for each sentence
-      sentences.forEach((sentence) => {
-        const prompt = `correct english of this sentence: ${sentence}`;
-        // Push the promise from the API call into the array
-        grammarCheckPromises.push(
-          axios.get(`https://3c92-103-253-89-37.ngrok-free.app/generate_code`, {
-            params: { prompts: prompt },
-          }),
-        );
-      });
-
-      // Resolve all promises
-      const grammarResults = await Promise.all(grammarCheckPromises);
-
-      // Extract corrected sentences
-      const correctedSentences = grammarResults.map((result) => result.data);
-
-      // Reassemble the corrected document from the corrected sentences
-      const correctedDocument = correctedSentences.join(" ");
-
-      // Save to MongoDB
-      const savedDocumentId = await saveCorrectedDocumentToMongoDB(
-        correctedDocument,
-        documentText,
+      const fileId = await saveUploadedDocument(
+        req.file.buffer,
+        req.file.originalname,
       );
-      res.json({
-        message: "Document processed and saved successfully",
-        id: savedDocumentId,
-      });
-      // Send the response
-      res.json({ correctedText: correctedDocument });
+      res
+        .status(201)
+        .send({ fileId: fileId.toString(), filename: req.file.originalname });
     } catch (error) {
-      console.error("Error processing the document:", error);
-      res.status(500).json({
-        message: "Error processing the document",
-        error: error.message,
-      });
+      res.status(500).send("Error saving file: " + error.message);
     }
   },
 );
+
+// In your Express router, add a new route to list all files
+router.get("/list-documents", async (req, res) => {
+  try {
+    const files = await retrieveAllFilesFromMongoDB();
+    res.send(
+      files.map((file) => ({ filename: file.filename, fileId: file._id })),
+    );
+  } catch (error) {
+    res.status(500).send("Error listing files: " + error.message);
+  }
+});
+
+router.get("/download-contest-document/:fileId", async (req, res) => {
+  try {
+    const fileId = req.params.fileId;
+    const fileStream = await retrieveFileFromMongoDB(fileId);
+    fileStream.on("file", (file) => {
+      // Set the response header to indicate a file attachment with the correct filename
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=" + file.filename,
+      );
+    });
+    // Pipe the file stream directly to the response object
+    fileStream.pipe(res);
+  } catch (error) {
+    res.status(500).send("Error downloading file: " + error.message);
+  }
+});
 
 export default router;

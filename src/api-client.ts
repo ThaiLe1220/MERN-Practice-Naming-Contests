@@ -49,10 +49,10 @@ export const suggestContestNames = async (theme) => {
   return res.data.suggestions; // Assuming the backend returns an array of suggestions
 };
 
-// Function to upload the contest document and check grammar
 export const uploadContestDocument = async (file) => {
   const formData = new FormData();
   formData.append("file", file);
+
   const response = await axios.post(
     `${API_SERVER_URL}/upload-contest-document`,
     formData,
@@ -61,6 +61,20 @@ export const uploadContestDocument = async (file) => {
         "Content-Type": "multipart/form-data",
       },
     },
+  );
+
+  return response.data;
+};
+
+export const listContestDocuments = async () => {
+  const response = await axios.get(`${API_SERVER_URL}/list-documents`);
+  return response.data;
+};
+
+export const downloadContestDocument = async (fileId) => {
+  const response = await axios.get(
+    `${API_SERVER_URL}/download-contest-document/${fileId}`,
+    { responseType: "blob" },
   );
   return response.data;
 };

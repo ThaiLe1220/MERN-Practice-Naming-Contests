@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 // File: contest-list.tsx
 import { React, useEffect, useState } from "react";
 import ContestPreview from "./contest-preview";
@@ -7,8 +8,9 @@ import {
   addNewContest,
   deleteContest,
   uploadContestDocument,
+  downloadContestDocument,
 } from "../api-client";
-
+import DocumentManager from "./document-manager";
 import Header from "./header";
 import axios from "axios";
 
@@ -74,36 +76,12 @@ const ContestList: React.FC<ContestListProps> = ({
     }
   };
 
-  const handleFileChange = (event) => {
-    setFile(event.target.files[0]);
-  };
-
-  const handleFileUpload = async (event) => {
-    event.preventDefault();
-    try {
-      const response = await uploadContestDocument(file); // Use the function from api-client
-      console.log(response); // Handle the response
-      // You can now set the document text to the state and use it as needed
-    } catch (error) {
-      console.error("Error uploading document", error);
-    }
-  };
-
   return (
     <>
-      <Header message="Naming Contests" />
+      {/* <Header message="Naming Contests" /> */}
+      <DocumentManager />
 
-      <div className="add-new-contest">
-        <form onSubmit={handleFileUpload}>
-          <input
-            type="file"
-            name="contestDocument"
-            accept=".doc,.docx"
-            onChange={handleFileChange}
-          />
-          <button type="submit">Upload Document</button>
-        </form>
-
+      {/* <div className="add-new-contest">
         <form onSubmit={handleNewContestSubmit}>
           <input type="text" name="contestName" placeholder="Contest Name" />
           <input type="text" name="categoryName" placeholder="Category Name" />
@@ -145,7 +123,7 @@ const ContestList: React.FC<ContestListProps> = ({
             />
           );
         })}
-      </div>
+      </div> */}
     </>
   );
 };
